@@ -26,7 +26,7 @@ else
 fi
 
 echo "[+] Formatting partitions..."
-mkfs.fat -F32 "$EFI_PART"
+mkfs.fat -F 32 "$EFI_PART"
 mkfs.ext4 -F "$ROOT_PART"
 
 echo "[+] Mounting partitions..."
@@ -35,7 +35,7 @@ mkdir /mnt/boot
 mount "$EFI_PART" /mnt/boot
 
 echo "[+] Installing base system..."
-pacstrap /mnt base linux linux-firmware vim networkmanager grub efibootmgr
+pacstrap /mnt base linux-zen linux-firmware vim networkmanager grub efibootmgr
 
 echo "[+] Generating fstab..."
 genfstab -U /mnt >> /mnt/etc/fstab
