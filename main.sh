@@ -4,6 +4,19 @@
 
 set -e
 
+# Prompt for inputs
+read -rp "Enter target disk (e.g., /dev/sda): " DISK
+read -rp "Enter username: " USERNAME
+read -rsp "Enter password: " PASSWORD
+echo
+read -rsp "Confirm password: " PASSWORD2
+echo
+
+if [ "$PASSWORD" != "$PASSWORD2" ]; then
+    echo "[!] Passwords do not match. Exiting."
+    exit 1
+fi
+
 HOSTNAME="archlinux"
 
 echo "[+] Wiping disk and creating partitions..."
@@ -11,7 +24,7 @@ sgdisk -Z "$DISK"  # Zap all partitions
 sgdisk -a2048 -o "$DISK"
 
 # Create partitions:
-# 1: EFI (512M)
+# 1: EFI (1G)
 # 2: Root (rest of disk)
 sgdisk -n 1:0:+1G -t 1:ef00 -c 1:"EFI" "$DISK"
 sgdisk -n 2:0:0    -t 2:8300 -c 2:"ROOT" "$DISK"
@@ -26,7 +39,7 @@ else
 fi
 
 echo "[+] Formatting partitions..."
-mkfs.fat -F 32 "$EFI_PART"
+mkfs.fat -F32 "$EFI_PART"
 mkfs.ext4 -F "$ROOT_PART"
 
 echo "[+] Mounting partitions..."
@@ -35,7 +48,7 @@ mkdir /mnt/boot
 mount "$EFI_PART" /mnt/boot
 
 echo "[+] Installing base system..."
-pacstrap /mnt base linux-zen linux-firmware vim networkmanager grub efibootmgr
+pacstrap /mnt base linux linux-firmware vim networkmanager grub efibootmgr sudo
 
 echo "[+] Generating fstab..."
 genfstab -U /mnt >> /mnt/etc/fstab
